@@ -139,7 +139,7 @@ public final class CustomItems {
                     stat("🗡 Добыча V", "#86efac"),
                     stat("🛡 Повышенная прочность: " + plugin.getSwordMaxDurability(), "#7dd3fc"),
                     Component.empty(),
-                    warn("⏳ Исчезнет через 36 часов после первого сломанного блока"),
+                    warn("⏳ Исчезнет через 36 часов после первого удара"),
                     good("🔧 Можно чинить в наковальне")
             ));
             meta.getPersistentDataContainer().set(plugin.getItemIdKey(), PersistentDataType.STRING, ID_SWORD);
@@ -246,7 +246,9 @@ public final class CustomItems {
                     stat("🖱 ПКМ — открыть хранилище", "#a78bfa"),
                     Component.empty(),
                     stat("⚡ Бесконечная прочность", "#7dd3fc"),
-                    warn("⚠ Предметы хранятся в этой ячейке")
+                    good("♾ Не исчезает со временем"),
+                    warn("⚠ Предметы хранятся в этой ячейке"),
+                    warn("📥 Класть можно только в сундуки и бочки")
             ));
 
             meta.getPersistentDataContainer().set(plugin.getItemIdKey(), PersistentDataType.STRING, id);
@@ -339,13 +341,39 @@ public final class CustomItems {
                 .has(plugin.getFirstUseKey(), PersistentDataType.LONG);
     }
 
+    /**
+     * Действует ли на предмет таймер исчезновения.
+     * <p>
+     * Таймер есть только у инструментов и оружия (кирка, топор, меч).
+     * Ячейки хранения — вечные, они не исчезают никогда.
+     */
+    public static boolean isExpirable(ItemStack item) {
+        String id = getId(item);
+        if (id == null) {
+            return false;
+        }
+        return ID_PICKAXE.equals(id) || ID_AXE.equals(id) || ID_SWORD.equals(id);
+    }
+
     public static void stampFirstUse(ItemStack item) {
         item.editMeta(meta -> meta.getPersistentDataContainer().set(
                 plugin.getFirstUseKey(), PersistentDataType.LONG, System.currentTimeMillis()));
     }
 
+    /** Снимает отметку о начале отсчёта (например, со старых ячеек). */
+    public static void clearFirstUse(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return;
+        }
+        item.editMeta(meta -> meta.getPersistentDataContainer().remove(plugin.getFirstUseKey()));
+    }
+
     public static boolean isExpired(ItemStack item, long now) {
         if (item == null || !item.hasItemMeta()) {
+            return false;
+        }
+        // Ячейки хранения вечные — таймер на них не действует
+        if (!isExpirable(item)) {
             return false;
         }
         Long firstUse = item.getItemMeta().getPersistentDataContainer()

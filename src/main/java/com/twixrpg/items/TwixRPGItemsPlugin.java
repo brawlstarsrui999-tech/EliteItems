@@ -12,7 +12,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  * 2. Лабрис Гефеста (незеритовый топор): Эффективность V, рубит дерево целиком,
  *    прочность +700..1000, исчезает через 36 часов, чинить нельзя.
  * 3. Фарм-Меч (незеритовый меч): Добыча V, прочность +700..1000,
- *    исчезает через 36 часов, можно чинить в наковальне.
+ *    исчезает через 36 часов после первого удара, можно чинить в наковальне.
+ * 4. Ячейки Хранения: вечные (таймер на них не действует), класть их можно
+ *    только в обычные сундуки и бочки.
  */
 public final class TwixRPGItemsPlugin extends JavaPlugin {
 
@@ -42,7 +44,9 @@ public final class TwixRPGItemsPlugin extends JavaPlugin {
         CustomItems.init(this);
 
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+        getServer().getPluginManager().registerEvents(new SwordHitListener(this), this);
         getServer().getPluginManager().registerEvents(new RepairListener(), this);
+        getServer().getPluginManager().registerEvents(new CellContainerListener(), this);
         storageCellListener = new StorageCellListener(this);
         getServer().getPluginManager().registerEvents(storageCellListener, this);
 

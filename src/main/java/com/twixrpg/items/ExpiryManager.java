@@ -9,7 +9,10 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Периодически проверяет инвентари игроков и удаляет предметы,
- * у которых истёк срок действия (36 часов с первого сломанного блока).
+ * у которых истёк срок действия.
+ * <p>
+ * Таймер есть только у кирки/топора (с первого сломанного блока)
+ * и у меча (с первого удара). Ячейки хранения — вечные и не удаляются.
  */
 public final class ExpiryManager implements Runnable {
 
@@ -34,7 +37,18 @@ public final class ExpiryManager implements Runnable {
             if (item == null) {
                 continue;
             }
-            if (CustomItems.isCustom(item) && CustomItems.isExpired(item, now)) {
+            if (!CustomItems.isCustom(item)) {
+                continue;
+            }
+            // Ячейки вечные: снимаем случайно проставленную отметку таймера со старых предметов
+            if (!CustomItems.isExpirable(item)) {
+                if (CustomItems.hasFirstUse(item)) {
+                    CustomItems.clearFirstUse(item);
+                    inventory.setItem(slot, item);
+                }
+                continue;
+            }
+            if (CustomItems.isExpired(item, now)) {
                 String name = CustomItems.friendlyName(item);
                 inventory.setItem(slot, null);
                 player.sendMessage(Component.text(

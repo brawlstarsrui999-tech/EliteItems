@@ -450,6 +450,8 @@ public final class StorageCellListener implements Listener {
     private void writeContents(ItemStack cell, CellSession session) {
         cell.editMeta(meta -> {
             var pdc = meta.getPersistentDataContainer();
+            // Ячейки вечные — таймер исчезновения на них не действует
+            pdc.remove(plugin.getFirstUseKey());
             if (session.cellUuid != null) {
                 pdc.set(plugin.getCellUuidKey(), PersistentDataType.STRING, session.cellUuid);
             }
@@ -512,7 +514,11 @@ public final class StorageCellListener implements Listener {
         lore.add(Component.empty());
         lore.add(Component.text("⚡ Бесконечная прочность", TextColor.fromHexString("#7dd3fc"))
                 .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        lore.add(Component.text("♾ Не исчезает со временем", TextColor.fromHexString("#86efac"))
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         lore.add(Component.text("⚠ Предметы хранятся в этой ячейке", TextColor.fromHexString("#fca5a5"))
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        lore.add(Component.text("📥 Класть можно только в сундуки и бочки", TextColor.fromHexString("#fca5a5"))
                 .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
         meta.lore(lore);

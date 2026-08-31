@@ -44,8 +44,11 @@ public final class BlockBreakListener implements Listener {
             return;
         }
 
-        // Первый сломанный блок — запускаем таймер (36 часов)
-        if (!CustomItems.hasFirstUse(tool)) {
+        // Первый сломанный блок — запускаем таймер (36 часов).
+        // Только для кирки и топора: у меча отсчёт идёт с первого удара,
+        // а ячейки хранения вечные и таймера не имеют вовсе.
+        boolean timerTool = CustomItems.ID_PICKAXE.equals(id) || CustomItems.ID_AXE.equals(id);
+        if (timerTool && !CustomItems.hasFirstUse(tool)) {
             CustomItems.stampFirstUse(tool);
             long hours = plugin.getExpireMs() / 3_600_000L;
             player.sendMessage(Component.text("⏳ ", NamedTextColor.GOLD)
